@@ -5,6 +5,7 @@
 - **Gabriel Angelo Kaufmann**
 - **Jefferson Barzan Alexandrino**
 - **Jefferson Zeferino Pacheco**
+- **Theo Grings Gomide**
 
 ## Sobre o Cliente
 - **Empresa**: Bricker - Automação Imobiliária
