@@ -1,4 +1,4 @@
-# Projeto Integrador de IA - Avaliação 01
+# Projeto Integrador de Inteligência Artificial - Avaliação 01
 
 ## Sobre a Equipe
 - **Alexandre Hermes**
@@ -12,10 +12,10 @@
 - **CNPJ**: 43.689.075/0001-34
 - **Localização**: São Paulo, SP
 
-### O Problema
+## O Problema
 A **Bricker - Automação Imobiliária** enfrenta dificuldades com a instabilidade dos seus sistemas de Robotic Process Automation (RPA), que são críticos para a automação de diversos processos internos. Erros frequentes nos sistemas de RPA geram interrupções que demandam tempo e esforço manual da equipe para serem solucionados, impactando a produtividade e gerando custos operacionais adicionais. Além disso, a falta de um sistema de detecção e correção automatizada faz com que problemas simples acabem se tornando gargalos para os processos automatizados, afetando a satisfação dos clientes e a eficiência operacional da empresa.
 
-### A Solução
+## A Solução
 Para mitigar esses desafios, propomos uma solução que integra Inteligência Artificial aos sistemas de RPA da Bricker. Essa ferramenta de IA é capaz de automatizar todo o ciclo de detecção, análise e correção de erros, minimizando a necessidade de intervenção humana e acelerando o tempo de resolução dos problemas. 
 
 A solução utiliza uma **Large Language Model (LLM)** para analisar logs de erro e identificar rapidamente a causa dos problemas, propondo e implementando correções automáticas no sistema. Com isso, conseguimos:
@@ -31,6 +31,11 @@ A solução utiliza uma **Large Language Model (LLM)** para analisar logs de err
 - **Melhoria da Eficiência**: A resolução automática de erros garante a continuidade dos processos, evitando interrupções e atrasos.
 - **Aumento da Qualidade**: A solução garante a precisão e a confiabilidade dos processos automatizados, reduzindo a ocorrência de erros.
 
+## Fluxo
+<img src="diagrama.drawio.png" alt="Descrição da imagem" width="750" height="300">
+
+
+
 ## Tecnologias Utilizadas
 - **Python**: Core da solução.
 - **Playwright**: Utilizado para criar as automações.
@@ -39,5 +44,7 @@ A solução utiliza uma **Large Language Model (LLM)** para analisar logs de err
 
 ## Conclusão
 A solução proposta oferece uma abordagem inovadora e eficiente para superar os desafios enfrentados pela Bricker em seus sistemas de RPA. Ao integrar Inteligência Artificial ao processo de resolução de erros, conseguimos automatizar tarefas que antes exigiam intervenção manual, resultando em uma operação mais ágil e confiável. 
+
+
 
 Com a detecção e correção de falhas sendo feitas de forma automática, a Bricker pode reduzir significativamente os custos operacionais e minimizar o tempo de inatividade dos seus sistemas. Além disso, a solução garante uma maior consistência e precisão nos processos automatizados, melhorando a qualidade dos serviços prestados e aumentando a satisfação dos clientes. 
