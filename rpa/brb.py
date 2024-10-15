@@ -1,15 +1,53 @@
-from typing import Any, Dict
+import io
+import json
+import locale
+import re
+import time
+import traceback
+from typing import Any, Dict, List
+import uuid
+import pandas as pd
+from bs4 import BeautifulSoup
+from captura_envio import enviar_para_openai
+from playwright.sync_api import sync_playwright, Page
+
+from rpa.enums import CorrectionTypes, TaxTypes
+
+def get_dataframe_from_table( page: Page, header: int = None):
+    html_table = page.content()
+    table = BeautifulSoup(html_table, 'html.parser').find('table')
+    bin_table = io.StringIO(str(table))
+    df = pd.read_html(bin_table, flavor='bs4', header=header)[0]
+    return df
+
+def clean_currency_value(value: str) -> float:
+    """Limpa um valor de moeda e converte para float."""
+    cleaned_value = re.sub(r'[^0-9,]', '', value)
+    return locale.atof(cleaned_value)
+
+def is_value_present_in_table(page: Page, value):
+    # Encontrar todos os elementos td na tabela
+    td_elements = page.locator(
+        'table.MuiTable-root td.MuiTableCell-body'
+    ).element_handles()
+
+    for td_element in td_elements:
+        # Obter o texto do elemento
+        cell_text = td_element.text_content()
+
+        # Verificar se o valor desejado está presente no texto
+        if value in cell_text:
+            return True
 
 
 def create_simulation_ci(
-        self,
         financing_options: Dict[str, Any],
         simulation_input:  Dict[str, Any],
         page: Page,
     ) -> Dict[str, Any]:
         results: List[Dict[str, Any]] = []
 
-        url = self.ENDPOINTS.get('simulation')
+        url = 'https://sfhsimulador.brb.com.br/simuladorbrb/'
         page.goto(url)
         page.wait_for_load_state('load')
         property_origin = {'residential': '033', 'commercial': '085'}
@@ -93,34 +131,33 @@ def create_simulation_ci(
             # Wait load page for 10 seconds
             start_time = time.time()
             elapsed_time = 0
-
-            while self.is_value_present_in_table(page, 'NaN') and elapsed_time < 10:
+            while is_value_present_in_table(page, 'NaN') and elapsed_time < 10:
                 page.wait_for_timeout(100)
                 elapsed_time = time.time() - start_time
             data = {}
 
-            df1 = self.get_dataframe_from_table(page)
+            df1 = get_dataframe_from_table(page)
             df1.columns = ['Descrição', 'Valor']
             # Remover o prefixo "R$" e quaisquer espaços em branco
             df1['Valor'] = df1['Valor'].replace(r'[R$\s.]', '', regex=True)
             df1['Valor'] = df1['Valor'].apply(clean_currency_value)
             interest_year = df1.iloc[4]['Valor']
-            interest_month = annual_to_monthly_rate(interest_year)
+            interest_month = 0
             cet_year = df1.iloc[11]['Valor']
-            cet_month = annual_to_monthly_rate(cet_year)
+            cet_month = 0
 
             # Second table
             page.click('button:has-text("Simulação das Parcelas")')
             page.wait_for_load_state('domcontentloaded')
 
             expected_name = f'brb_ci_{table}_simulation_{uuid.uuid4().hex}.pdf'
-            file_name, file_b64 = self.download_pdf(
-                page=page,
-                expected_name=expected_name,
-                resource=HealthcheckResources.get_file_simulation_ci,
-            )
+            # file_name, file_b64 = download_pdf(
+            #     page=page,
+            #     expected_name=expected_name,
+            #     resource=HealthcheckResources.get_file_simulation_ci,
+            # )
 
-            df2 = self.get_dataframe_from_table(page, header=0)
+            df2 = get_dataframe_from_table(page, header=0)
             # Remover o prefixo "R$" e quaisquer espaços em branco
             for col in df2.columns:
                 if col in ('Parcela N°'):
@@ -134,7 +171,7 @@ def create_simulation_ci(
                 '() => { return JSON.parse(localStorage.getItem("persist:root")); }'
             )
             all_data = json.loads(storage_data.get('dadosResultadoSimulacao'))
-            detail_data = all_data.get('dadosDetalhamentoSimulacao')
+            detail_data = all_data.get('dadosDetalhamecreate_simulation_cintoSimulacao')
             amount_financed = float(detail_data.get('VA_FINANCIAMENTO'))
 
             data = {
@@ -148,8 +185,8 @@ def create_simulation_ci(
                 'extra_data': storage_data,
                 'correction_type': correction_type,
                 'correction_rate': correction_rate,
-                'file_name': file_name,
-                'file_b64': file_b64,
+                # 'file_name': file_name,
+                # 'file_b64': file_b64,
             }
 
             return data
@@ -172,52 +209,69 @@ def create_simulation_ci(
         )
         try:
             data = get_result(**financing_options)
-            results.append(
-                SimulationResult(
-                    bank=self.bank_context.bank_name,
-                    status=SimulationBankStatus.completed,
-                    first_payment=data['first_payment'],
-                    last_payment=data['last_payment'],
-                    interest_year=data['interest_year'],
-                    interest_month=data['interest_month'],
-                    cet_year=data['cet_year'],
-                    cet_month=data['cet_month'],
-                    amortization_system=AmortizationType[amortization],
-                    tax_type=tax_type,
-                    correction_type=correction_type,
-                    correction_rate=data['correction_rate'],
-                    financing_term=simulation_input.financing_term,
-                    amount_financed=data['amount_financed'],
-                    file_name=data['file_name'],
-                    file_b64=data['file_b64'],
-                    extra_data=data['extra_data'],
-                )
-            )
-
-        except Exception:
-            results.append(
-                SimulationResult(
-                    bank=self.bank_context.bank_name,
-                    status=SimulationBankStatus.error,
-                    first_payment=0,
-                    last_payment=0,
-                    interest_year=0,
-                    interest_month=0,
-                    cet_year=0,
-                    cet_month=0,
-                    amortization_system=AmortizationType[amortization],
-                    correction_type=correction_type,
-                    tax_type=tax_type,
-                    financing_term=simulation_input.financing_term,
-                    amount_financed=simulation_input.amount_financed,
-                )
-            )
-            temp_send_error_alert_and_healthcheck(
-                page=page,
-                bank=FinancialInstituitionTypes.brb,
-                resource=HealthcheckResources.create_simulation_ci,
-                status='off',
-                raw_payload=self.raw_payload,
-            )
+            results.append(data)
+        except Exception as e:
+            print(e)
 
         return results
+    
+
+def run_rpa():
+    playwright = sync_playwright().start()
+    browser = playwright.chromium.launch(
+        headless=False,
+        slow_mo=500,
+    )
+    context = browser.new_context(
+        user_agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        # storage_state=(
+        #     session_storage_path if os.path.exists(session_storage_path) else None
+        # ),
+    )
+    page = context.new_page()
+        
+    try:
+        input_data = {
+            "external_id": "sm_lvw35tgmu67zb59zf",
+            "loan_type": "CI",
+            "person_type": "pf",
+            "full_name": "joaozinho silva",
+            "cpf_number": "646.927.000-09",
+            "birth_date": "1960-01-12",
+            "company_revenue_last_month": "0.00",
+            "property_type": "apartment",
+            "property_usage_type": "residential",
+            "property_value": "2101569.92",
+            "entry_value": 829394.99,
+            "amount_financed": 1272174.93,
+            "financing_term": 189,
+            "gross_monthly_income": "30000.00",
+            "property_region": "SP",
+            "table": "sac",
+            "adjustment": "pre_tr"
+        }
+        financing_options = {
+            'table': input_data['table'],
+            'adjustment': input_data['adjustment'],
+        }
+        create_simulation_ci(financing_options=financing_options, simulation_input=input_data, page=page)
+    except Exception as e:
+        html = page.content()
+        tb_str = traceback.format_exception(type(e), e, e.__traceback__)
+        print('tb_str', tb_str)
+        codigo_resolvido = enviar_para_openai({
+            "html": html,
+            "traceback": ''.join(tb_str),
+            "codigo": open(__file__).read()
+        })
+        
+        '''
+            Se em caso de exception é possível preservar o contexto
+            Caso seja possível:
+                Se é possível continuar exatamente de onde parou
+            Caso não seja possível:
+                Reexecute todo o rpa novamente mas sem precisar de input do usuário
+        '''
+        print('codigo_resolvido', codigo_resolvido)
+        exec(codigo_resolvido.get('choices')[0].get('message').get('content'))
+        
