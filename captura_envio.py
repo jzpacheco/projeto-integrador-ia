@@ -25,11 +25,13 @@ def enviar_para_openai(dados):
         "Authorization": "Bearer sua_chave_api",  # Substitua com sua chave da API
         "Content-Type": "application/json"
     }
+    print ('headers', headers)
     print('Enviando para OpenAI...')
-    response = requests.post(url, headers=headers, json={"model": "gpt-4o-mini","messages": [{"role": "user", "content": f'RETURN FIXED CODE ONLY {str(dados)}'}]})
+    response = requests.post(url, headers=headers, json={"model": "gpt-4o-mini","messages": [{"role": "user", "content": f'RETURN FIXED CODE ONLY, CODE THAT ITS FULL READY TO ONLY COPY AND EXECUTE WITH COMMAND EXEC() {str(dados)}'}]})
     
     if response.status_code == 200:
-        return response.json()
+        content= response.json().get('choices')[0].get('message').get('content')
+        return content.strip().replace("```python", "").replace("```", "")
     else:
         print(f"Erro ao enviar para OpenAI: {response.status_code} - {response.text}")
         return None
