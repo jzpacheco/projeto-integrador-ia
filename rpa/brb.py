@@ -2,6 +2,8 @@ import io
 import json
 import locale
 import re
+import subprocess
+
 import time
 import traceback
 from typing import Any, Dict, List
@@ -217,61 +219,59 @@ def create_simulation_ci(
     
 
 def run_rpa():
-    playwright = sync_playwright().start()
-    browser = playwright.chromium.launch(
-        headless=False,
-        slow_mo=500,
-    )
-    context = browser.new_context(
-        user_agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        # storage_state=(
-        #     session_storage_path if os.path.exists(session_storage_path) else None
-        # ),
-    )
-    page = context.new_page()
-        
-    try:
-        input_data = {
-            "external_id": "sm_lvw35tgmu67zb59zf",
-            "loan_type": "CI",
-            "person_type": "pf",
-            "full_name": "joaozinho silva",
-            "cpf_number": "646.927.000-09",
-            "birth_date": "1960-01-12",
-            "company_revenue_last_month": "0.00",
-            "property_type": "apartment",
-            "property_usage_type": "residential",
-            "property_value": "2101569.92",
-            "entry_value": 829394.99,
-            "amount_financed": 1272174.93,
-            "financing_term": 189,
-            "gross_monthly_income": "30000.00",
-            "property_region": "SP",
-            "table": "sac",
-            "adjustment": "pre_tr"
-        }
-        financing_options = {
-            'table': input_data['table'],
-            'adjustment': input_data['adjustment'],
-        }
-        create_simulation_ci(financing_options=financing_options, simulation_input=input_data, page=page)
-    except Exception as e:
-        html = page.content()
-        tb_str = traceback.format_exception(type(e), e, e.__traceback__)
-        print('tb_str', tb_str)
-        codigo_resolvido = enviar_para_openai({
-            "html": html,
-            "traceback": ''.join(tb_str),
-            "codigo": open(__file__).read()
-        })
-        
-        '''
-            Se em caso de exception é possível preservar o contexto
-            Caso seja possível:
-                Se é possível continuar exatamente de onde parou
-            Caso não seja possível:
-                Reexecute todo o rpa novamente mas sem precisar de input do usuário
-        '''
-        print('codigo_resolvido', codigo_resolvido)
-        exec(codigo_resolvido.get('choices')[0].get('message').get('content'))
-        
+    with  sync_playwright() as playwright:
+        browser = playwright.chromium.launch(
+            headless=False,
+            slow_mo=500,
+        )
+        context = browser.new_context(
+            user_agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            # storage_state=(
+            #     session_storage_path if os.path.exists(session_storage_path) else None
+            # ),
+        )
+        page = context.new_page()
+            
+        try:
+            input_data = {
+                "external_id": "sm_lvw35tgmu67zb59zf",
+                "loan_type": "CI",
+                "person_type": "pf",
+                "full_name": "joaozinho silva",
+                "cpf_number": "646.927.000-09",
+                "birth_date": "1960-01-12",
+                "company_revenue_last_month": "0.00",
+                "property_type": "apartment",
+                "property_usage_type": "residential",
+                "property_value": "2101569.92",
+                "entry_value": 829394.99,
+                "amount_financed": 1272174.93,
+                "financing_term": 189,
+                "gross_monthly_income": "30000.00",
+                "property_region": "SP",
+                "table": "sac",
+                "adjustment": "pre_tr"
+            }
+            financing_options = {
+                'table': input_data['table'],
+                'adjustment': input_data['adjustment'],
+            }
+            create_simulation_ci(financing_options=financing_options, simulation_input=input_data, page=page)
+        except Exception as e:
+            html = page.content()
+            tb_str = traceback.format_exception(type(e), e, e.__traceback__)
+            codigo_resolvido = enviar_para_openai({
+                "html": html,
+                "traceback": ''.join(tb_str),
+                "codigo": open(__file__).read()
+            })
+            # exec(codigo_resolvido)
+            # if 'run_rpa' in locals():
+            #     run_rpa()
+                
+            with open("codigo_resolvido.py", "w") as f:
+                f.write(codigo_resolvido)
+
+            # Agora tente executar o arquivo
+            subprocess.run(["python", "codigo_resolvido.py"])
+            print('Fim da execução')        
