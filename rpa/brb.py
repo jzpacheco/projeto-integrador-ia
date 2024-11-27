@@ -1,3 +1,5 @@
+#Aplicado engenharia de prompt na linha 265 até 273
+
 import io
 import json
 import locale
@@ -261,9 +263,14 @@ def run_rpa():
             html = page.content()
             tb_str = traceback.format_exception(type(e), e, e.__traceback__)
             codigo_resolvido = enviar_para_openai({
-                "html": html,
-                "traceback": ''.join(tb_str),
-                "codigo": open(__file__).read()
+                "prompt": (
+                    "Você é um assistente especializado em depuração de código Python."
+                    "Analise o seguinte HTML, traceback e código-fonte para identificar e corrigir o problema."
+                    "Forneça uma versão corrigida do código com comentários explicativos:"
+                    f"\n\nHTML Capturado:\n{html}"
+                    f"\n\nErro (Traceback):\n{''.join(tb_str)}"
+                    f"\n\nCódigo Original:\n{open(__file__).read()}"
+                )
             })
             # exec(codigo_resolvido)
             # if 'run_rpa' in locals():

@@ -1,3 +1,5 @@
+#Aplicado eng de prompt
+
 import traceback
 import requests
 
@@ -30,49 +32,41 @@ def enviar_para_openai(dados):
         "Authorization": "Bearer sua_chave_api",  # Substitua pela sua chave da API.
         "Content-Type": "application/json"
     }
-    
-    print('headers', headers)  # Mostra os cabeçalhos da requisição para depuração.
-    print('Enviando para OpenAI...')
-    
-    # Faz uma requisição POST para a OpenAI com os dados, incluindo o código que falhou.
-    response = requests.post(
-        url, 
-        headers=headers, 
-        json={
-            "model": "gpt-4o-mini",  # Define o modelo que será usado (supondo que seja esse, ajuste se necessário).
-            "messages": [
-                {
-                    "role": "user", 
-                    "content": f'RETURN FIXED CODE ONLY, CODE THAT ITS FULL READY TO ONLY COPY AND EXECUTE WITH COMMAND EXEC() {str(dados)}'
-                }
-            ]
-        }
-    )
-    
-    # Verifica se a requisição foi bem-sucedida.
-    if response.status_code == 200:
-        # Se for bem-sucedida, extrai o conteúdo da resposta JSON e retorna o código corrigido.
-        content = response.json().get('choices')[0].get('message').get('content')
-        # Remove qualquer formatação de código Markdown ("```python") da resposta e retorna o código final.
-        return content.strip().replace("```python", "").replace("```", "")
-    else:
-        # Caso ocorra um erro na requisição, exibe a mensagem de erro.
-        print(f"Erro ao enviar para OpenAI: {response.status_code} - {response.text}")
-        return None  # Retorna None se não houver sucesso.
 
-# Função para tratar a resposta recebida da OpenAI.
-def tratar_resposta(resposta):
-    if resposta:
-        # Se houver uma resposta válida, extrai o código corrigido da estrutura JSON.
-        codigo_corrigido = resposta.get("choices")[0].get("message").get("content")
-        
-        # Exibe o código corrigido no console.
-        print("Código Corrigido:")
-        print(codigo_corrigido)
-        
-        # Retorna o código corrigido.
-        return codigo_corrigido
-    else:
-        # Se não for possível obter uma resposta válida, exibe uma mensagem de erro.
-        print("Não foi possível obter uma resposta válida da OpenAI.")
-        return None  # Retorna None se não houver uma resposta válida.
+    # Resumir HTML e traceback caso sejam muito longos.
+    html_summary = dados['html'][:500] + '... [HTML truncado]' if len(dados['html']) > 500 else dados['html']
+    traceback_summary = dados['traceback'][:500] + '... [Traceback truncado]' if len(dados['traceback']) > 500 else dados['traceback']
+
+    # Mensagem detalhada para o prompt enviado à API.
+    prompt = f"""
+Você é um assistente especializado em correção de código Python.
+Recebi um código com o seguinte erro:
+{traceback_summary}
+
+HTML capturado durante a execução:
+{html_summary}
+
+Código original:
+{dados['codigo']}
+
+Por favor, corrija o código acima. Certifique-se de que o código corrigido:
+- Seja funcional e pronto para execução.
+- Inclua comentários explicativos para qualquer mudança ou otimização realizada.
+- Siga boas práticas de programação.
+Retorne apenas o código corrigido, sem explicações adicionais.
+"""
+
+    # Enviando a requisição para a API.
+    response = requests.post(
+        url,
+        headers=headers,
+        json={
+            "model": "gpt-4",  # Ajuste o modelo conforme necessário.
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.2,  # Para respostas mais focadas.
+            "max_tokens": 1500,  # Limite de tokens para a resposta.
+            "top_p": 1.0,
+        },
+    )
+
+    # Verifica se a requisição foi bem-sucedida.
