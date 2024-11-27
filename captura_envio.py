@@ -39,22 +39,22 @@ def enviar_para_openai(dados):
 
     # Mensagem detalhada para o prompt enviado à API.
     prompt = f"""
-Você é um assistente especializado em correção de código Python.
-Recebi um código com o seguinte erro:
-{traceback_summary}
+        Você é um assistente especializado em correção de código Python.
+        Recebi um código com o seguinte erro:
+        {traceback_summary}
 
-HTML capturado durante a execução:
-{html_summary}
+        HTML capturado durante a execução:
+        {html_summary}
 
-Código original:
-{dados['codigo']}
+        Código original:
+        {dados['codigo']}
 
-Por favor, corrija o código acima. Certifique-se de que o código corrigido:
-- Seja funcional e pronto para execução.
-- Inclua comentários explicativos para qualquer mudança ou otimização realizada.
-- Siga boas práticas de programação.
-Retorne apenas o código corrigido, sem explicações adicionais.
-"""
+        Por favor, corrija o código acima. Certifique-se de que o código corrigido:
+        - Seja funcional e pronto para execução.
+        - Inclua comentários explicativos para qualquer mudança ou otimização realizada.
+        - Siga boas práticas de programação.
+        Retorne apenas o código corrigido, sem explicações adicionais.
+        """
 
     # Enviando a requisição para a API.
     response = requests.post(
@@ -63,8 +63,8 @@ Retorne apenas o código corrigido, sem explicações adicionais.
         json={
             "model": "gpt-4",  # Ajuste o modelo conforme necessário.
             "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.2,  # Para respostas mais focadas.
-            "max_tokens": 1500,  # Limite de tokens para a resposta.
+            "temperature": 0.2, 
+            "max_tokens": 1500,  
             "top_p": 1.0,
         },
     )
