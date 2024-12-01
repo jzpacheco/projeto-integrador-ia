@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "rpa-auto-fixer"
+version = "0.1.0"
+description = "Uma biblioteca para automação de processos robóticos, com foco em correção automática de erros."
+authors = ["jzpacheco <jeffersonpacheco@hotmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"    
+playwright = "^1.49.0"
+bs4 = "^0.0.2"
+pandas = "^2.2.3"
+requests = "^2.32.3"
+openai = "^1.55.3"
+python-decouple = "^3.8"
+pydantic = "^2.10.2"
+pydantic-settings = "^2.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
