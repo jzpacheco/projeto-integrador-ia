@@ -61,14 +61,21 @@ def fill_form(page):
     page.fill('input[name="71__custom"]', 'This is a custom message.')
     page.fill('input[name="72__commnt"]', 'These are some comments.')
 
+
+#Alterei esta parte pois o Chromium estava fechando sozinho após preencher todos os campo. Agr não faz mais isso.
 def main():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=100)
-        page = browser.new_page()
-        page.goto('https://www.roboform.com/filling-test-all-fields')  # Substitua pela URL do seu formulário
-        fill_form(page)
-        # Você pode adicionar mais interações ou verificações aqui
-        browser.close()
+    playwright = sync_playwright().start()  # Inicia o Playwright manualmente
+    browser = playwright.chromium.launch(headless=False, slow_mo=100)
+    page = browser.new_page()
+    page.goto('https://www.roboform.com/filling-test-all-fields')  
+    fill_form(page)
+    
+    # Mantém o navegador aberto
+    print("Navegador permanecerá aberto. Pressione CTRL+C para encerrar.")
+    input("Pressione Enter para sair...")  # Aguarda o usuário finalizar
+
+    browser.close()
+    playwright.stop()  # Finaliza o Playwright manualmente
 
 if __name__ == '__main__':
     main()

@@ -1,15 +1,23 @@
-from openai import OpenAI
+#Aplicado engenharia de prompt
 
-client = OpenAI(api_key='')
+from openai import OpenAI
+            #Chave de API
+client = OpenAI(api_key=' ')
+
 completion = client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="gpt-4",
     messages=[
-        {"role": "system", "content": "You are a rpa developer who uses playwright with python to develop and maintain banking website automation."},
+        {"role": "system", "content": (
+            "Você é um desenvolvedor de RPA que usa Playwright com Python para automatizar sites bancários."
+        )},
         {
             "role": "user",
-            "content": "Develop a rpa automation to this url to full fill the existing file"
+            "content": (
+                "Desenvolva uma automação RPA para este URL para preencher o arquivo existente.\n"
+                "Utilize Playwright com Python."
+            )
         }
     ]
 )
 
-print(completion.choices[0].message)
+print(completion.choices[0].message["content"])

@@ -1,4 +1,4 @@
-# Projeto Integrador de Inteligência Artificial - Avaliação 01
+# Projeto Integrador de Inteligência Artificial
 
 ## Sobre a Equipe
 - **Alexandre Hermes**
@@ -34,17 +34,14 @@ A solução utiliza uma **Large Language Model (LLM)** para analisar logs de err
 ## Fluxo
 <img src="diagrama.drawio.png" alt="Descrição da imagem" width="750" height="300">
 
-
-
 ## Tecnologias Utilizadas
 - **Python**: Core da solução.
 - **Playwright**: Utilizado para criar as automações.
 - **Celery**: Para trabalhar com tarefas assíncronas (Tasks).
 - **LangChain**: Para criar e gerenciar os prompts e requisições ao serviço OpenAI.
+- **Engenharia de Prompt**: Técnica utilizada para otimizar a interação com modelos de IA, permitindo a geração de respostas mais precisas e alinhadas às necessidades do sistema.
 
 ## Conclusão
 A solução proposta oferece uma abordagem inovadora e eficiente para superar os desafios enfrentados pela Bricker em seus sistemas de RPA. Ao integrar Inteligência Artificial ao processo de resolução de erros, conseguimos automatizar tarefas que antes exigiam intervenção manual, resultando em uma operação mais ágil e confiável. 
-
-
 
 Com a detecção e correção de falhas sendo feitas de forma automática, a Bricker pode reduzir significativamente os custos operacionais e minimizar o tempo de inatividade dos seus sistemas. Além disso, a solução garante uma maior consistência e precisão nos processos automatizados, melhorando a qualidade dos serviços prestados e aumentando a satisfação dos clientes. 
