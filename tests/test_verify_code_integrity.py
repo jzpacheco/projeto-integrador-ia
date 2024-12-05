@@ -1,7 +1,5 @@
 from utils.verify_code_integrity import VerifyCodeIntegrity
 
-
-
 def test_is_code_safe():
     verifier = VerifyCodeIntegrity()
     
