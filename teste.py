@@ -1,5 +1,3 @@
-#Aplicado engenharia de prompt na linha 265 até 273
-
 import io
 import json
 import locale
@@ -17,7 +15,7 @@ from playwright.sync_api import sync_playwright, Page
 
 from rpa.enums import CorrectionTypes, TaxTypes
 
-def get_dataframe_from_table( page: Page, header: int = None):
+def get_dataframe_from_table(page: Page, header: int = None):
     html_table = page.content()
     table = BeautifulSoup(html_table, 'html.parser').find('table')
     bin_table = io.StringIO(str(table))
@@ -55,13 +53,13 @@ def create_simulation_ci(
         page.goto(url)
         page.wait_for_load_state('load')
         property_origin = {'residential': '033', 'commercial': '085'}
-        person_type = simulation_input.person_type
-        income = simulation_input.gross_monthly_income
+        person_type = simulation_input['person_type']  # Acesso corrigido
+        income = simulation_input['gross_monthly_income']
 
         if person_type == 'pf':
             page.get_by_role('button', name='Pessoa Física').first.click()
         elif person_type == 'pj':
-            income = simulation_input.company_revenue_last_month
+            income = simulation_input['company_revenue_last_month']
             property_origin = {'residential': '112', 'commercial': '094'}
             page.get_by_role('button', name='Pessoa Jurídica').first.click()
         else:
@@ -69,12 +67,12 @@ def create_simulation_ci(
 
         is_lot = False
         brb_correction_index = {'ipca': '207', 'tr': '206'}
-        if simulation_input.property_type not in [
+        if simulation_input['property_type'] not in [
             'commercial_lot',
             'street_lot',
             'condo_lot',
         ]:
-            if simulation_input.property_usage_type == 'commercial':
+            if simulation_input['property_usage_type'] == 'commercial':
                 brb_correction_index = {'ipca': '217', 'tr': '216'}
                 page.get_by_role('button', name='Imóvel Comercial22222 Imóvel').click()#TODO:REMOVE THIS
                 page.get_by_role('combobox', name='Origem do imóvel').select_option(
@@ -92,24 +90,24 @@ def create_simulation_ci(
             is_lot = True
             page.get_by_role('button', name='Lote Regularizado222 Lote').click() #TODO:REMOVE THIS
             if person_type == 'pf':
-                if simulation_input.property_usage_type == 'residential':
+                if simulation_input['property_usage_type'] == 'residential':
                     page.get_by_role('button', name='Residencial').click()
                 else:
                     page.get_by_role('button', name='Comercial').click()
 
         page.locator('input[name="vlr_imovel"]').press_sequentially(
-            str(int(simulation_input.property_value))
+            str(int(simulation_input['property_value']))
         )
         page.locator('input[name="vlr_financ"]').press_sequentially(
-            str(int(simulation_input.amount_financed))
+            str(int(simulation_input['amount_financed']))
         )
         elem = page.get_by_placeholder('meses')
         elem.click()
-        elem.fill(str(simulation_input.financing_term))
+        elem.fill(str(simulation_input['financing_term']))
         if person_type == 'pf':
             elem = page.get_by_placeholder('DD/MM/AAAA')
             elem.click()
-            elem.fill(simulation_input.birth_date)
+            elem.fill(simulation_input['birth_date'])
         page.locator('input[name="vlr_rendafaturamento"]').press_sequentially(
             str(int(income))
         )
@@ -258,9 +256,12 @@ def run_rpa():
                 'table': input_data['table'],
                 'adjustment': input_data['adjustment'],
             }
-            result =create_simulation_ci(financing_options=financing_options, simulation_input=input_data, page=page)
+            result = create_simulation_ci(financing_options=financing_options, simulation_input=input_data, page=page)
             print('result', result)
         except Exception as e:
             html = page.content()
             fixer = RPAFixer(func_name='create_simulation_ci', kwargs={'financing_options': financing_options, 'simulation_input': input_data, 'page': page})
             fixer.analyse_and_fix(e, html)
+
+if __name__ == '__main__':
+    run_rpa()
