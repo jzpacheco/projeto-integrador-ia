@@ -16,6 +16,7 @@ openai = "^1.55.3"
 python-decouple = "^3.8"
 pydantic = "^2.10.2"
 pydantic-settings = "^2.6.1"
+html5lib = "^1.1"
 
 
 [build-system]

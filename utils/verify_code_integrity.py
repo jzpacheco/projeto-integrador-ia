@@ -26,3 +26,4 @@ class VerifyCodeIntegrity:
             return True
         except SyntaxError:
             return False
+        
