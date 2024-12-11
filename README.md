@@ -5,7 +5,6 @@
 - **Gabriel Angelo Kaufmann**
 - **Jefferson Barzan Alexandrino**
 - **Jefferson Zeferino Pacheco**
-- **Theo Grings Gomide**
 
 ## Sobre o Cliente
 - **Empresa**: Bricker - Automação Imobiliária
@@ -35,10 +34,10 @@ A solução utiliza uma **Large Language Model (LLM)** para analisar logs de err
 <img src="diagrama.drawio.png" alt="Descrição da imagem" width="750" height="300">
 
 ## Tecnologias Utilizadas
-- **Python**: Core da solução.
-- **Playwright**: Utilizado para criar as automações.
-- **Celery**: Para trabalhar com tarefas assíncronas (Tasks).
-- **LangChain**: Para criar e gerenciar os prompts e requisições ao serviço OpenAI.
+- **Python**: Linguagem de programação versátil e popular, usada para desenvolvimento web, análise de dados, automação, inteligência artificial e aprendizado de máquina, devido à sua sintaxe simples e rica variedade de bibliotecas.
+- **OpenAI SDK**: Ferramenta para integrar facilmente APIs da OpenAI, como GPT e DALL-E, em aplicativos, permitindo criar soluções de inteligência artificial avançadas, como chatbots e geração de imagens.
+- **python-decouple**: Biblioteca para gerenciar configurações sensíveis e variáveis de ambiente de forma segura, separando dados confidenciais do código-fonte e simplificando o gerenciamento de ambientes.
+- **Pydantic**: Biblioteca para validação e parsing de dados com modelos baseados em Python, garantindo integridade e permitindo a criação de objetos bem definidos a partir de entradas externas.
 - **Engenharia de Prompt**: Técnica utilizada para otimizar a interação com modelos de IA, permitindo a geração de respostas mais precisas e alinhadas às necessidades do sistema.
 
 ## Conclusão

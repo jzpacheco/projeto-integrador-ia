@@ -1,6 +1,5 @@
 import ast
 
-
 class VerifyCodeIntegrity:
 
     DANGEROUS_FUNCTIONS = [
@@ -27,6 +26,4 @@ class VerifyCodeIntegrity:
             return True
         except SyntaxError:
             return False
-        
-        
         
